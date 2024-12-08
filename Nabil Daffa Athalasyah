@@ -1,0 +1,265 @@
+# Nama: NABIL DAFFA ATHALASYAH
+# NIM: 2409116090
+# Kelas: Sistem Informasi C' 2024
+# UAS DASAR PEMROGRAMAN 
+
+from prettytable import PrettyTable
+from datetime import datetime
+import pwinput
+import time
+import os
+os.system("cls")
+Gacor = os.path.abspath(os.curdir)
+
+# DAFTAR/LIST THRIFT SESUAI DENGAN WAKTU (PAGI/SIANG/MALAM)
+thrift = {
+    "pagi": [
+        {"nama": "T-shirt", "harga": 250},
+        {"nama": "Black Trousers", "harga": 200},
+        {"nama": "Premium Slipper", "harga": 200},
+        {"nama": "Socks", "harga": 150},
+        {"nama": "White Shoes", "harga": 850},
+        {"nama": "Sweater", "harga": 1000},
+    ],
+    "siang": [
+        {"nama": "Kemeja Premium", "harga": 650},
+        {"nama": "Batik", "harga": 400},
+        {"nama": "Jeans", "harga": 400},
+        {"nama": "Sneaker", "harga": 650},
+        {"nama": "Black Shoes", "harga": 900},
+        {"nama": "Premium Eyeglasses", "harga": 600},
+    ],
+    "malam": [
+        {"nama": "Hoodie", "harga": 800},
+        {"nama": "Cloth Trousers", "harga": 700},
+        {"nama": "Nike Air Jordan Shoes", "harga": 1800},
+        {"nama": "Premium Shoes", "harga": 1200},
+        {"nama": "Training Trousers", "harga": 500},
+        {"nama": "Jacket", "harga": 600},
+    ]
+}
+
+# AKUN USER (REGULAR/VIP)
+akun = {
+    "kategori": {
+        "VIP": {
+            "Nabdaff": {"password": "nabdaff2005", "Gold": 0, "status": False}
+        },
+        "Reguler": {
+            "Nabil": {"password": "nabil2005", "Gold": 0,"status": False}
+        }
+    }
+}
+
+voucher = {
+    "THRIFTBIASA": {"Status": "Belum", "Diskon": 0.05, "Disc": "5%"},
+    "THRIFTVIP": {"Status": "Belum", "Diskon": 0.1, "Disc": "10%"}
+}
+
+# DAFTAR LIST THRIFT BERDASARKAN WAKTU (PAGI/SIANG/MALAM)
+def waktu():
+    jam_sekarang = datetime.now().hour
+    if 8 <= jam_sekarang < 12:
+        return "pagi"
+    elif 12 <= jam_sekarang < 18:
+        return "siang"
+    elif 18 <= jam_sekarang < 23:
+        return "malam"
+    return None
+
+# CEK STATUS USER
+def cek_status(nama):
+    if nama in akun["kategori"]["VIP"]:
+        return akun["kategori"]["VIP"][nama]["status"]
+    elif nama in akun["kategori"]["Reguler"]:
+        return akun["kategori"]["Reguler"][nama]["status"]
+    return False
+
+# LOGIN USER (REGULER/VIP)
+def login():
+    os.system("cls")
+    print("+=================================================+")
+    print("|       SELAMAT DATANG DI NRTX.APPAREL STORE      |")
+    print("|         SILAHKAN LOGIN DENGAN AKUN ANDA!        |")
+    print("+=================================================+")
+    
+    attempts = 0
+    while attempts < 3:
+        username = input("Masukkan Username Akun Anda: ")
+        password = pwinput.pwinput("Masukkan Password Akun Anda: ")
+
+        if username in akun["kategori"]["VIP"] and akun["kategori"]["VIP"][username]["password"] == password:
+            print("+================================================+")
+            print("| Login Berhasil! Anda masuk sebagai Member VIP. |")
+            print("+================================================+")
+            time.sleep(1)
+            menu(username)
+            return
+        elif username in akun["kategori"]["Reguler"] and akun["kategori"]["Reguler"][username]["password"] == password:
+            print("+====================================================+")
+            print("| Login Berhasil! Anda masuk sebagai Member Reguler. |")
+            print("+====================================================+")
+            time.sleep(1)
+            menu(username)
+            return
+        else:
+            attempts += 1
+            print("+=======================================================+")
+            print("| Username atau Password Anda SALAH! Silakan coba lagi. |")
+            print("+=======================================================+")
+        
+        if attempts == 3:
+            print("+==========================================================================================+")
+            print("| Akun Anda Terkunci Sementara! karena terlalu banyak percobaan. (Tunggu hingga 10 Detik!) |")
+            print("+==========================================================================================+")
+            time.sleep(10)
+            login()
+
+# LIHAT DAFTAR/LIST THRIFT
+def lihat_thrift(nama):
+    os.system("cls")
+    jam = waktu()
+    if jam:
+        print(f"Daftar thrift untuk waktu {jam.capitalize()}:\n")
+        tabel = PrettyTable()
+        tabel.field_names = ["No", "Nama Barang", "Harga"]
+        for idx, item in enumerate(thrift[jam], start=1):
+            tabel.add_row([idx, item["nama"], f"Rp. {item['harga']}"])
+        print(tabel)
+    else:
+        print("+============================================================+")
+        print("| Toko sedang TUTUP! Silakan kembali pada jam operasional :) |")
+        print("+============================================================+")
+
+# PEMBELIAN THRIFT
+def beli_thrift(nama):
+    os.system("cls")
+    print("╔═════════════════════════════════════╗")
+    print("║           LIST DAFTAR THRIFT        ║")
+    print("╚═════════════════════════════════════╝")
+    lihat_thrift(nama)
+    jam = waktu()
+    try:
+        pilih = int(input("Pilih Thrift yang ingin dibeli (No): "))
+        jumlah = int(input("Masukkan jumlah Thrift yang ingin dibeli: "))
+        if pilih < 1 or pilih > len(thrift[jam]):
+            raise ValueError("Pilihan tidak valid.")
+        item = thrift[jam][pilih - 1]
+        total = item['harga'] * jumlah
+
+        if nama in akun["kategori"]["VIP"]:
+            print("Karena Anda member VIP, Anda mendapatkan diskon 10%!")
+            total *= 0.9
+
+        gunakan_voucher = input("Apakah Anda ingin menggunakan voucher? (ya/tidak): ").lower()
+        if gunakan_voucher == "ya":
+            vcr = input("Masukkan kode voucher: ").upper()
+            if vcr in voucher and voucher[vcr]["Status"] == "Belum":
+                print(f"Voucher berhasil digunakan! Diskon tambahan {voucher[vcr]['Disc']}.")
+                total -= total * voucher[vcr]["Diskon"]
+                voucher[vcr]["Status"] = "Sudah"
+            else:
+                print("+===========================================+")
+                print("| Voucher tidak valid atau sudah digunakan! |")
+                print("+===========================================+")
+
+        print(f"\nKeterangan:\nBarang: {item['nama']}\nJumlah: {jumlah}\nTotal Harga: Rp. {int(total)}")
+        konfirmasi = input("Bayar sekarang? (ya/tidak): ").lower()
+        if konfirmasi == "ya":
+            kategori = "VIP" if nama in akun["kategori"]["VIP"] else "Reguler"
+            user_akun = akun["kategori"][kategori][nama]
+            
+            if user_akun.get("Gold", 0) >= total:
+                user_akun["Gold"] -= total
+                print(f"Pembayaran berhasil menggunakan Gold! Sisa Gold Anda: {user_akun['Gold']}")
+            elif user_akun.get("saldo", 0) >= total:
+                user_akun["saldo"] -= total
+                print(f"Pembayaran berhasil menggunakan Saldo! Sisa Saldo Anda: {user_akun['saldo']}")
+            else:
+                print("Gold Anda tidak mencukupi. Silakan lakukan top-up terlebih dahulu.")
+        else:
+            print("+========================+")
+            print("|  Pembelian dibatalkan! |")
+            print("+========================+")
+    except (ValueError, IndexError):
+                        print("+=========================================+")
+                        print("| Pilihan Tidak Valid. Silakan Coba Lagi! |")
+                        print("+=========================================+")
+
+# TOP-UP GOLD
+def Topup_Gold(nama):
+    print("╔═════════════════════════════════════╗")
+    print("║           MENU TOP-UP GOLD          ║")
+    print("╚═════════════════════════════════════╝")
+    
+    kategori = "VIP" if nama in akun["kategori"]["VIP"] else "Reguler"
+    akun_data = akun["kategori"][kategori][nama]
+    
+    gold_options = {
+        1: 200,
+        2: 500,
+        3: 700,
+        4: 900,
+        5: 1500
+    }
+    
+    print("Pilih jumlah Gold yang ingin ditambahkan:")
+    for key, value in gold_options.items():
+        print(f"[{key}] {value} Gold")
+    print("[6] Kembali")
+    
+    try:
+        pilih = int(input("Pilih opsi top-up: "))
+        
+        if pilih in gold_options:
+            gold = gold_options[pilih]
+            
+            akun_data["Gold"] += gold
+            print(f"Top-up Gold berhasil! Gold Anda sekarang: {akun_data['Gold']}")
+        elif pilih == 6:
+            return
+        else:
+                        print("+=========================================+")
+                        print("| Pilihan Tidak Valid. Silakan Coba Lagi! |")
+                        print("+=========================================+")
+    except ValueError:
+                        print("+=========================================+")
+                        print("| Pilihan Tidak Valid. Silakan Coba Lagi! |")
+                        print("+=========================================+")
+
+# MAIN MENU
+def menu(nama):
+    os.system("cls")
+    while True:
+        print("╔═════════════════════════════════════╗")
+        print("║     MENU UTAMA NRTX.APPAREL STORE   ║")
+        print("╚═════════════════════════════════════╝")
+        print("| [1] Lihat Thrift                    |")
+        print("| [2] Beli Thrift                     |")
+        print("| [3] Top-Up Gold                     |")
+        print("| [4] Keluar                          |")
+        print("+=====================================+")
+        pilih = input("Pilih menu: ")
+        
+        if pilih == "1":
+            lihat_thrift(nama)
+        elif pilih == "2":
+            beli_thrift(nama)
+        elif pilih == "3":
+            Topup_Gold(nama)
+        elif pilih == "4":
+            print("╔══════════════════════════════════════════════════╗")
+            print("║ TERIMAKASIH TELAH MENGUNJUNGI NRTX.APPAREL STORE ║")
+            print("╚══════════════════════════════════════════════════╝")
+            break
+        else:
+                        print("+=========================================+")
+                        print("| Pilihan Tidak Valid. Silakan Coba Lagi! |")
+                        print("+=========================================+")
+
+# JALANKAN PROGRAM
+def main():
+    login()
+    
+    
+main()
